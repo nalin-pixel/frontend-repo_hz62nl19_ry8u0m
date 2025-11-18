@@ -3,15 +3,29 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App'
 import Test from './Test'
+import ShopPage from './pages/Shop'
+import AdminPage from './pages/Admin'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Orders from './pages/Orders'
+import { AuthProvider } from './context/AuthContext'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/test" element={<Test />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />}> 
+            <Route index element={<ShopPage />} />
+            <Route path="admin" element={<AdminPage />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="test" element={<Test />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   </React.StrictMode>,
 )

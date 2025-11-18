@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import ProductCard from './ProductCard'
+import { useAuth } from '../context/AuthContext'
 
 const API = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
 
 function Dashboard() {
   const [products, setProducts] = useState([])
-  const [cart, setCart] = useState([])
+  const [cart, setCart] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('byterize:cart') || '[]') } catch { return [] }
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { user } = useAuth()
 
   useEffect(() => {
     (async () => {
@@ -23,6 +27,10 @@ function Dashboard() {
     })()
   }, [])
 
+  useEffect(() => {
+    try { localStorage.setItem('byterize:cart', JSON.stringify(cart)) } catch {}
+  }, [cart])
+
   const addToCart = (p) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.id === p.id)
@@ -37,11 +45,12 @@ function Dashboard() {
 
   const checkout = async () => {
     try {
+      const email = user?.email || 'guest@byterize.dev'
       const items = cart.map((c) => ({ product_id: c.id, title: c.title, price: c.price, quantity: c.quantity }))
       const res = await fetch(`${API}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_email: 'guest@byterize.dev', items, total })
+        body: JSON.stringify({ user_email: email, items, total })
       })
       const data = await res.json()
       if (res.ok) {
